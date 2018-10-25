@@ -14,7 +14,6 @@ reserved = {
 
 
 tokens = [
-    'ID', #strings
     'LOWERID',
     'UPPERID',
     'NUM',
@@ -49,9 +48,6 @@ tokens = [
     ] + list(reserved.values())
 
 # Tokens
-t_ID              = r'[a-zA-Z_][a-zA-Z0-9_]*'
-t_LOWERID         = r'[a-z][a-zA-Z0-9_]*'
-t_UPPERID         = r'[A-Z][a-zA-Z0-9_]*'
 t_STRING          = r'("[^"]*")'
 
 t_DEFEQ           = r'='
@@ -80,7 +76,23 @@ t_TIMES           = r'\*'
 t_DIV             = r'\/'
 t_MOD             = r'%'
 
-t_ignore = ' '
+t_ignore = " \t"
+
+def t_CHAR(t):
+    r'''[\'].*.[\']'''
+    return t
+
+def t_LOWERID(t):
+    r'''[a-z][_a-zA-Z_0-9]*'''
+    if t.value in reserved:
+        t.type = reserved[ t.value ]
+    return t
+
+def t_UPPERID(t):
+    r'''[A-Z][_a-zA-Z_0-9]*'''
+    if t.value in reserved:
+        t.type = reserved[ t.value ]
+    return t
 
 def t_NUM(t):
     r'\d+'
@@ -88,8 +100,8 @@ def t_NUM(t):
         t.value = int(t.value)
     except ValueError:
         print("Integer value too large %d", t.value)
-    t.value = 0
-    return t # Ignored characters t_ignore = " \t"
+        t.value = 0
+    return t
 
 def t_newline(t):
     r'\n+'
@@ -104,4 +116,22 @@ def t_COMMENT(t):
     pass
     # No return value. Token discarded
 
-lexer = lex.lex(debug=1)
+def t_eof(t):
+    return None
+
+lexer = lex.lex()
+"""
+t1 = '''
+def t2 = case x
+         | True  -> a
+         | False -> b
+'''
+
+t2 = 'def t1 = \ x -> x'
+lexer.input(t2)
+while True:
+     tok = lexer.token()
+     if not tok:
+         break
+     print(tok)
+"""
