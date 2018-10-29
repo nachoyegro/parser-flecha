@@ -39,12 +39,12 @@ tokens = [
     'GT',
     'LT',
     #Operadores aritmeticos
+    'UMINUS',
     'PLUS',
     'SUB',
     'TIMES',
     'DIV',
     'MOD',
-    'UMINUS',
     ] + list(reserved.values())
 
 # Tokens
@@ -60,7 +60,7 @@ t_ARROW           = r'->'
 
 t_AND             = r'&&'
 t_OR              = r'\|\|'
-t_NOT             = r'!'
+t_NOT             = r'\!'
 
 t_EQ              = r'=='
 t_NE              = r'!='
@@ -70,8 +70,8 @@ t_GT              = r'>'
 t_LT              = r'<'
 
 t_PLUS            = r'\+'
-t_SUB             = r'-'
 t_UMINUS          = r'-'
+t_SUB             = r'-'
 t_TIMES           = r'\*'
 t_DIV             = r'\/'
 t_MOD             = r'%'
@@ -121,14 +121,10 @@ def t_eof(t):
 
 lexer = lex.lex()
 """
-t1 = '''
-def t2 = case x
-         | True  -> a
-         | False -> b
-'''
+t1 = '''def a = - b'''
 
 t2 = 'def t1 = \ x -> x'
-lexer.input(t2)
+lexer.input(t1)
 while True:
      tok = lexer.token()
      if not tok:

@@ -13,7 +13,7 @@ class Node(object):
         self.children.append(child)
         return self
 
-    def print_leaf(self):
+    def print_leaf(self, level=0):
         string = ''
         if self.leaf:
             string += repr(self.leaf)
@@ -32,14 +32,14 @@ class Node(object):
                         string += child.repr(level+1)
                     except:
                         string += repr(child) + ', '
-            string += "  "*level+ "], \n"
+            string += " "*level+ "], \n"
         return string
 
     #TODO: refactorear esto
     def __repr__(self, level=0):
-        ret = '  '*level+ '['
+        ret = ' '*level+ '['
         ret += self.print_type(level)
-        ret += self.print_leaf()
+        ret += self.print_leaf(level)
         ret += '\n'
         ret += self.print_children(level)
         return ret
@@ -71,7 +71,7 @@ class Program(Node):
                         ret += child.repr(level+1)
                     except:
                         ret += repr(child)
-            ret += "  "*level+ "]\n"
+            ret += " "*level+ "]\n"
         else:
             ret += ']'
         return ret
@@ -95,14 +95,14 @@ class ExprApply(Node):
         super(ExprApply, self).__init__('ExprApply',children, leaf)
 
 class CaseBranch(Node):
-    def __init__(self,children=[], leaf=None):
+    def __init__(self,children=[], leaf=None, parameters=[]):
+        self.parameters=parameters
         super(CaseBranch, self).__init__('CaseBranch',children, leaf)
 
-    def print_leaf(self):
+    def print_leaf(self, level=0):
         string = ''
         if self.leaf:
-            for leaf in self.leaf:
-                string += repr(leaf) + ', '
+            string += repr(self.leaf) +repr(self.parameters)
         if not self.children:
             string += '],'
         return string
@@ -111,11 +111,20 @@ class ExprCase(Node):
     def __init__(self,children=[], leaf=None):
         super(ExprCase, self).__init__('ExprCase',children, leaf)
 
+    def print_leaf(self, level=0):
+        str = ''
+        if self.leaf:
+            str = '\n'
+            str += ' '*level + repr(self.leaf)
+        return str
+
     def print_children(self, level):
-        if not self.children:
-            return '[]\n'
-        else:
-            return super(ExprCase, self).print_children(level)
+        ret = ' '*level + '[\n'
+        for child in self.children:
+            if child:
+                ret += child.repr(level+1)
+        ret += ' '*level + '],\n'
+        return ret
 
 class ExprLet(Node):
     def __init__(self,children=[], leaf=None):
@@ -131,6 +140,14 @@ class Parameters(Node):
     def __repr__(self, level=0):
         return self.print_children(level)
 
+class CaseParameters(Parameters):
+    def __init__(self,children=[], leaf=None):
+        super(CaseParameters, self).__init__(children, leaf)
+
+    def print_children(self, level):
+        return ', [' + ', '.join(self.children) + '],'
+
+
 
 class ExprVar(Node):
 
@@ -145,6 +162,10 @@ class ExprVar(Node):
 
     def __init__(self, type='ExprVar', children=[], leaf=None):
         super(ExprVar, self).__init__(type,[], self._symbols[leaf] if self._symbols.has_key(leaf) else leaf)
+
+class ExprUnop(ExprVar):
+    _symbols = { '!': 'NOT',
+                 '-': 'UMINUS',}
 
 class ExprConstructor(ExprVar):
     def __init__(self,children=[], leaf=None):
@@ -167,44 +188,73 @@ class ExprLambda(Node):
     def print_children(self, level):
         ret = ''
         for child in self.children:
-            ret += child.repr(level+1)
+            if child:
+                ret += child.repr(level+1)
         return ret
 
     def __repr__(self, level=0):
         ret = ''
         if self.type:
-            ret = '  '*level+ '['
+            ret = ' '*level+ '['
             ret += self.print_type(level)
             ret += '\n'
-            ret += self.print_children(level)
-            ret += "  "*level+ "], \n"
+            ret +=    self.print_children(level)
+            ret += " "*level+ "], \n"
         else:
             ret += self.print_children(level)
         return ret
 
     def print_type(self, level=0):
         if self.type:
-            return '"' +str(self.type)+'", "' + str(self.leaf) + '",'
+            return '"' +str(self.type)+'", ' + self.print_leaf(level)
         else:
             return ''
 
-class ExprString(Node):
-    def __init__(self,children=[], leaf=None):
-        super(ExprString, self).__init__('ExprString', children, leaf)
+    def print_leaf(self, level=0):
+        return '"' + str(self.leaf) + '",'
 
-    def print_type(self, level=0):
-        return ''
+class ExprString(ExprLambda):
+    def __init__(self,type='', children=[], leaf=None, parameters='', parent=False):
+        self.parent=parent
+        super(ExprString, self).__init__('ExprApply', children, '', parameters.replace('"', ''), None)
 
     def transform(self):
-        self.leaf = self.leaf.replace('"', '')
-        for char in self.leaf:
-            self.children.append(ExprChar(leaf=char))
+        if len(self.parameters) > 0:
+            #Genero los hijos recursivamente
+            self.children.append(ExprString(children=[ExprString(children=[ExprConstructor(leaf="Cons"),
+                                                                            ExprChar(leaf=self.parameters[0])])],
+                                            parameters=self.parameters[1:]))
+        #Cuando llego al ultimo, agrego Nil a mis hijos
+        if len(self.parameters) == 1 or (len(self.parameters) == 0 and self.parent):
+            self.children.append(ExprConstructor(leaf="Nil"))
+
+    def print_leaf(self, level=0):
+        return ''
+
+    def print_children(self, level):
+        ret = ''
+        for child in self.children:
+            if child:
+                ret += child.repr(level+1)
+        return ret
+
+    def __repr__(self, level=0):
+        ret = ''
+        if self.type and not self.parent:
+            ret = ' '*level+ '['
+            ret += self.print_type(level)
+            ret += '\n'
+            ret +=    self.print_children(level)
+            ret += " "*level+ "], \n"
+        else:
+            ret += self.print_children(level)
+        return ret
 
 class ExprChar(Node):
     def __init__(self,children=[], leaf=None):
         super(ExprChar, self).__init__('ExprChar', children, leaf)
 
-    def print_leaf(self):
+    def print_leaf(self, level):
         string = ''
         if self.leaf:
             string += str(ord(self.leaf.replace("'", ''))) + '],'
