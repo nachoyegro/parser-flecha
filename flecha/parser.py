@@ -68,7 +68,9 @@ def p_externexp(p):
 
 def p_ifexp(p):
     '''ifexp : IF internexp THEN internexp elsebranch'''
-    p[0]=ExprCase(leaf=p[2], children=[CaseBranch(leaf="True", parameters=[], children=[p[4]]), CaseBranch(leaf="False", parameters=[], children=[p[5]])])
+    p[0]=ExprCase(leaf=p[2], children=[CaseBranch(leaf="True", parameters=[], children=[p[4]]),
+                                       CaseBranch(leaf="False", parameters=[], children=[p[5]])
+                                       ])
 
 def p_elsebranch(p):
     '''elsebranch : ELIF internexp THEN internexp elsebranch
@@ -80,13 +82,13 @@ def p_elsebranch(p):
 
 def p_caseexp(p):
     '''caseexp : CASE internexp casebranches'''
-    p[0]=ExprCase(children=[p[2], p[3]])
+    p[0]=ExprCase(children=p[3], leaf=p[2])
 
 def p_casebranches(p):
     '''casebranches : empty
                     | casebranch casebranches'''
     if len(p)==3:
-        p[0]=ExprCase(children=[p[1],p[2]])
+        p[0]=[p[1]] + p[2]
     else:
         p[0]=[]
 

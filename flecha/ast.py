@@ -95,17 +95,22 @@ class ExprApply(Node):
         super(ExprApply, self).__init__('ExprApply',children, leaf)
 
 class CaseBranch(Node):
-    def __init__(self,children=[], leaf=None, parameters=[]):
+    def __init__(self,children=[], leaf=None, parameters=None):
         self.parameters=parameters
         super(CaseBranch, self).__init__('CaseBranch',children, leaf)
 
     def print_leaf(self, level=0):
         string = ''
         if self.leaf:
-            string += repr(self.leaf) +repr(self.parameters)
+            string += repr(self.leaf) + self.print_parameters()
         if not self.children:
             string += '],'
         return string
+
+    def print_parameters(self):
+        if self.parameters is not None:
+            return ', ' + repr(self.parameters) + ','
+        return ''
 
 class ExprCase(Node):
     def __init__(self,children=[], leaf=None):
@@ -118,12 +123,21 @@ class ExprCase(Node):
             str += ' '*level + repr(self.leaf)
         return str
 
+    def __repr__(self, level=0):
+        ret = ' '*level + '['
+        ret += self.print_type(level+1) if self.leaf else ''
+        ret += self.print_leaf(level+1)
+        ret += ' '*(level+1) + '[\n'
+        ret += self.print_children(level+1)
+        ret += ' '*(level+1) + ']\n'
+        ret += ' '*level + ']\n'
+        return ret
+
     def print_children(self, level):
-        ret = ' '*level + '[\n'
+        ret = ''
         for child in self.children:
             if child:
                 ret += child.repr(level+1)
-        ret += ' '*level + '],\n'
         return ret
 
 class ExprLet(Node):
@@ -145,7 +159,7 @@ class CaseParameters(Parameters):
         super(CaseParameters, self).__init__(children, leaf)
 
     def print_children(self, level):
-        return ', [' + ', '.join(self.children) + '],'
+        return '[' + ', '.join(self.children) + ']'
 
 
 
