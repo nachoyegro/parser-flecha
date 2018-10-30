@@ -11,6 +11,18 @@ reserved = {
     'in' : 'IN',
 }
 
+############################################################################
+
+# Precedencia
+precedence = (
+    ('left','OR', 'AND'),
+    ('right', 'NOT'),
+    ('left','EQ','NE', 'GE', 'LE', 'GT', 'LT',),
+    ('right','PLUS','SUB'),
+    ('left','TIMES'),
+    ('left','DIV', 'MOD'),
+    ('right','UMINUS'),
+)
 
 
 tokens = [
@@ -121,7 +133,7 @@ def t_eof(t):
 
 lexer = lex.lex()
 """
-t1 = '''def a = - b'''
+t1 = '''def a = a + b - c'''
 
 t2 = 'def t1 = \ x -> x'
 lexer.input(t1)
