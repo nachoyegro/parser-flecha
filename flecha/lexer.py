@@ -48,7 +48,7 @@ tokens = [
     ] + list(reserved.values())
 
 # Tokens
-t_STRING          = r'("[^"]*")'
+t_STRING          = r'"(?:\\.|[^"\\])*"'
 
 t_DEFEQ           = r'='
 t_SEMICOLON       = r';'

@@ -219,14 +219,16 @@ class ExprString(ExprLambda):
         super(ExprString, self).__init__('ExprApply', children, '', parameters.replace('"', ''), None)
 
     def transform(self):
-        if len(self.parameters) > 0:
+        if len(self.parameters) >= 1:
             #Genero los hijos recursivamente
-            self.children.append(ExprString(children=[ExprString(children=[ExprConstructor(leaf="Cons"),
+            str = ExprString(children=[ExprString(children=[ExprConstructor(leaf="Cons"),
                                                                             ExprChar(leaf=self.parameters[0])])],
-                                            parameters=self.parameters[1:]))
+                                            parameters=self.parameters[1:])
+            self.children.append(str)
         #Cuando llego al ultimo, agrego Nil a mis hijos
-        if len(self.parameters) == 1 or (len(self.parameters) == 0 and self.parent):
-            self.children.append(ExprConstructor(leaf="Nil"))
+            if len(self.parameters) == 1:
+                nil = ExprConstructor(leaf="Nil")
+                str.children.append(nil)
 
     def print_leaf(self, level=0):
         return ''
@@ -256,8 +258,13 @@ class ExprChar(Node):
 
     def print_leaf(self, level):
         import codecs
-        string = ''
+        result = ''
         if self.leaf:
-            decoded = codecs.decode(self.leaf.replace("'", '', 2), 'unicode_escape')
-            string += str(ord(decoded)) + '],'
-        return string
+            string = self.leaf.replace("'", '', 2)
+            try:
+                decoded = codecs.decode(string, 'unicode_escape')
+            except UnicodeDecodeError:
+                #Python no permite que un string termine con un numero par de contrabarras
+                decoded = string
+            result += str(ord(decoded)) + '],'
+        return result
