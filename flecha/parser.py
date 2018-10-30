@@ -69,7 +69,7 @@ def p_expression(p):
     '''expression : externexp
                   | externexp SEMICOLON expression'''
     if len(p) > 2:
-        p[0]=[p[1], ';', p[3]]
+        p[0]=ExprLet(leaf='_', children=[p[1], p[3]])
     else:
         p[0]=p[1]
 
