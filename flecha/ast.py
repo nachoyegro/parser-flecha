@@ -255,7 +255,9 @@ class ExprChar(Node):
         super(ExprChar, self).__init__('ExprChar', children, leaf)
 
     def print_leaf(self, level):
+        import codecs
         string = ''
         if self.leaf:
-            string += str(ord(self.leaf.replace("'", ''))) + '],'
+            decoded = codecs.decode(self.leaf.replace("'", '', 2), 'unicode_escape')
+            string += str(ord(decoded)) + '],'
         return string

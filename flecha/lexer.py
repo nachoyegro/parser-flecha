@@ -79,7 +79,7 @@ t_MOD             = r'%'
 t_ignore = " \t"
 
 def t_CHAR(t):
-    r'''[\'].*.[\']'''
+    r'''('[^?]{1,2}')'''
     return t
 
 def t_LOWERID(t):

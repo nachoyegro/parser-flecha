@@ -36,7 +36,7 @@ def p_program(p):
     p[0]=p[1]
 
 def p_not_empty(p):
-    ''' not_empty : program definition '''
+    '''not_empty : program definition'''
     p[0] = p[1].add_child(p[2])
 
 def p_empty(p):
