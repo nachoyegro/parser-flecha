@@ -6,22 +6,6 @@ import ply.yacc as yacc
 from lexer import *
 from ast import *
 
-
-############################################################################
-
-# Precedencia
-precedence = (
-    ('left','OR'),
-    ('left','AND'),
-    ('right', 'NOT'),
-    ('left','EQ','NE', 'GE', 'LE', 'GT', 'LT',),
-    ('left','PLUS','SUB'),
-    ('left','TIMES'),
-    ('left','DIV', 'MOD'),
-    ('right','UMINUS'),
-    )
-
-#################################################################
 #definiciones
 #
 def p_error(parser):
