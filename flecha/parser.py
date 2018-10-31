@@ -138,7 +138,7 @@ def p_internexp(p):
 
 def p_unop(p):
     '''unop : NOT
-            | SUB'''
+            | SUB %prec UMINUS'''
     p[0]=ExprUnop(leaf=p[1])
 
 def p_binop(p):
