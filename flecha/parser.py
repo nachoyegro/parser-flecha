@@ -57,7 +57,6 @@ def p_expression(p):
     else:
         p[0]=p[1]
 
-#TODO: en realidad no deberia ser apply
 def p_externexp(p):
     '''externexp : ifexp
                  | caseexp
@@ -102,8 +101,16 @@ def p_id(p):
     p[0]=p[1]
 
 def p_letexp(p):
-    '''letexp : LET LOWERID parameters DEFEQ internexp IN externexp'''
-    p[0] = ExprLet(leaf=p[2], children=[p[5], p[7]])
+    '''letexp : LET LOWERID letParams externexp'''
+    p[0] = ExprLet(leaf=p[2], children=[p[3], p[4]])
+
+def p_letParams(p):
+    '''letParams : lambdaParams DEFEQ internexp IN
+                 | DEFEQ internexp IN'''
+    if len(p) == 5:
+        p[0]=ExprLambda(parameters=p[1], expr=p[3])
+    else:
+        p[0]=p[2]
 
 def p_lambdaexp(p):
     '''lambdaexp : LAMBDA lambdaParams ARROW externexp'''
@@ -120,7 +127,7 @@ def p_lambdaParams(p):
 def p_internexp(p):
     '''internexp : appexp
                  | unop internexp
-                 | internexp binop internexp'''
+                 | internexp binop appexp'''
 
     if len(p) == 2:
         p[0]=p[1]

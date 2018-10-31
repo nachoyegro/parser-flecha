@@ -172,7 +172,12 @@ class ExprVar(Node):
                  '&&': 'AND',
                  '*' : 'MUL',
                  '/' : 'DIV',
-                 '%' : 'MOD'}
+                 '%' : 'MOD',
+                 '!=' : 'NE',
+                 '<' : 'LT',
+                 '<=': 'LE',
+                 '>=': 'GE',
+                 '>' : 'GT'}
 
     def __init__(self, type='ExprVar', children=[], leaf=None):
         super(ExprVar, self).__init__(type,[], self._symbols[leaf] if self._symbols.has_key(leaf) else leaf)
