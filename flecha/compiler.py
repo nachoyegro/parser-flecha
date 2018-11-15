@@ -21,8 +21,18 @@ class FlechaCompiler(object):
             res += self.mov_reg(function_reg, registry)
             print(res)
 
-    def compile_ExprNumber(self, expression):
-        return ''
+    def compile_ExprNumber(self, num):
+        res = ''
+        registry = self.next_registry()
+        res += self.alloc(registry, 2) + '\n'                 #Reservo 2 celdas
+        temp_registry = self.next_registry()                  #Traigo el proximo registro disponible
+        res += self.mov_int(temp_registry, 1) + '\n'          #Pongo el numero 1, correspondiente a enteros
+        res += self.store(registry, 0, temp_registry) + '\n'  #Pongo en la celda 0 de registry el numero 1
+        res += self.mov_int(temp_registry, num[0]) + '\n'    #Pongo el numero que representa el char en el registro temporal
+        res += self.store(registry, 1, temp_registry) + '\n'  #Pongo en la celda 1 de registry el valor de temp
+        self.free_registry(temp_registry)                     #Libero el registro temp
+        self.last_registry = registry
+        return res
 
     def compile_ExprVar(self, expression):
         # ['unsafePrintChar']
