@@ -184,7 +184,9 @@ class ExprVar(Node):
 
 class ExprUnop(ExprVar):
     _symbols = { '!': 'NOT',
-                 '-': 'UMINUS',}
+                 '-': 'UMINUS',
+                 'unsafePrintInt': 'unsafePrintInt',
+                 'unsafePrintChar': 'unsafePrintChar'}
 
 class ExprConstructor(ExprVar):
     def __init__(self,children=[], leaf=None):

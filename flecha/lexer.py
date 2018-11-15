@@ -9,6 +9,9 @@ reserved = {
     'case': 'CASE',
     'let': 'LET',
     'in' : 'IN',
+    'unsafePrintInt': 'unsafePrintInt',
+    'unsafePrintChar': 'unsafePrintChar',
+
 }
 
 ############################################################################

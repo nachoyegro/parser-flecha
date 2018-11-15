@@ -138,7 +138,9 @@ def p_internexp(p):
 
 def p_unop(p):
     '''unop : NOT
-            | SUB %prec UMINUS'''
+            | SUB %prec UMINUS
+            | unsafePrintInt
+            | unsafePrintChar'''
     p[0]=ExprUnop(leaf=p[1])
 
 def p_binop(p):
