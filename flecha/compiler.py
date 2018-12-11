@@ -11,6 +11,7 @@ class FlechaCompiler(object):
         self.register_count = 0
         self.registers = {}
         self.global_env = {}
+        self.loaded = {}
 
     def compile(self):
         for definition in self.program:
@@ -37,18 +38,26 @@ class FlechaCompiler(object):
                 if registry in env.keys():
                     temp_registry = env[registry]
                     res += self.mov_reg(registry, temp_registry) + '\n'
+                    res += self.load(temp_registry, registry, 1) + '\n'   #Pongo en temp_registry el valor que hay en la posicion 1 de registry
                 #Sino, chequeo si esta en el entorno global
                 elif registry in self.global_env.keys():
                     temp_registry = self.global_env[registry]
                     res += self.mov_reg(registry, temp_registry) + '\n'
+                    #Chequeo que no haya sido cargado ya
+                    if temp_registry not in self.loaded.keys():
+                        res += self.load(temp_registry, registry, 1) + '\n'   #Pongo en temp_registry el valor que hay en la posicion 1 de registry
+                        self.loaded[temp_registry] = True
                 #Sino, lo agrego al entorno local
                 else:
                     temp_registry = self.next_registry()
                     env[registry] = temp_registry
                     res += self.mov_reg(temp_registry, registry) + '\n'
+                    res += self.load(temp_registry, registry, 1) + '\n'   #Pongo en temp_registry el valor que hay en la posicion 1 de registry
             else:
                 temp_registry = self.next_registry()
-            res += self.load(temp_registry, registry, 1) + '\n'   #Pongo en temp_registry el valor que hay en la posicion 1 de registry
+                res += self.load(temp_registry, registry, 1) + '\n'   #Pongo en temp_registry el valor que hay en la posicion 1 de registry
+            #TODO: En el caso que @G_foo este en el entorno global no deberia hacer load
+
             res += self.unsafe_print(temp_registry, expression[0]) + '\n'          #Hago print
         else:
             global_registry = '@G_' + expression[0]
@@ -96,7 +105,7 @@ class FlechaCompiler(object):
         #Agrego el registro al env
         env['@G_'+var] = self.last_registry
         res2, env = self.compile_expression(children[2], env)
-        return res + res1 + res2, env
+        return res + res1 + res2, {}
 
 
     def compile_expression(self, expression, env, reg=None):
