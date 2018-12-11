@@ -1,7 +1,5 @@
-import copy
 reserved_vars = ['unsafePrintInt', 'unsafePrintChar']
-
-#TODO: tengo que cambiar la parte de los registros para crear un entorno
+constructors = {'True': 4, 'False': 5, 'Nil': 6, 'Cons': 7}
 
 class FlechaCompiler(object):
 
@@ -89,11 +87,11 @@ class FlechaCompiler(object):
         self.last_registry = registry
         return res, env
 
-    def compile_ExprConstructor(self, num, env, reg=None):
+    def compile_ExprConstructor(self, cons, env, reg=None):
         res = ''
         registry = self.next_registry()
         res += self.alloc(registry, 1) + '\n'                 #Reservo 1 celda
-        res += self.mov_int('$t', 4)  + '\n'                  #4 = Tag para el constructor True.
+        res += self.mov_int('$t', constructors[cons[0]])  + '\n'                  #4 = Tag para el constructor True.
         res += self.store(registry, 0, '$t') + '\n'
         self.last_registry = registry
         return res, env
